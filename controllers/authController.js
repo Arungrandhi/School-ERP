@@ -202,8 +202,12 @@ export const staffLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.json({ token, role: staff.role, schoolCode });
-
+   res.json({
+  token,
+  role: staff.role,
+  schoolCode,
+  academicRecordId: staff._id
+});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
