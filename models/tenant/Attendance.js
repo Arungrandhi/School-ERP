@@ -14,7 +14,6 @@ const attendanceSchema = new mongoose.Schema(
       required: true
     },
 
-    // ✅ NEW FIELD
     session: {
       type: String,
       enum: ["MORNING", "AFTERNOON"],
@@ -25,6 +24,32 @@ const attendanceSchema = new mongoose.Schema(
       type: String,
       enum: ["PRESENT", "ABSENT", "LEAVE"],
       required: true
+    },
+
+    // ✅ PUNCH-IN LOCATION (captured when staff marks attendance)
+    punchInLocation: {
+      latitude: {
+        type: Number,
+        default: null
+      },
+      longitude: {
+        type: Number,
+        default: null
+      },
+      address: {
+        type: String,
+        default: null
+      },
+      // Accuracy in meters from browser GPS
+      accuracy: {
+        type: Number,
+        default: null
+      },
+      // Timestamp of when punch-in occurred
+      punchedAt: {
+        type: Date,
+        default: null
+      }
     }
   },
   { timestamps: true }
@@ -32,7 +57,7 @@ const attendanceSchema = new mongoose.Schema(
 
 /*
   ✅ Prevent duplicate attendance
-  Same student
+  Same student / staff
   Same date
   Same session
 */

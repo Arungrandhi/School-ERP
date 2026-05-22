@@ -7,6 +7,7 @@ import academicRoutes from "./routes/academicRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
 import marksRoutes from "./routes/marksRoutes.js";
 
+import geocodeRoutes from "./routes/geocodeRoutes.js";
 
 
 const app = express();
@@ -19,7 +20,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/tenant", tenantRoutes);
 
-
+app.use("/api/geocode", geocodeRoutes);
 
 
 app.use("/api/academic", academicRoutes);
