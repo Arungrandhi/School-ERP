@@ -9,6 +9,9 @@ import academicRecordSchema from "./AcademicRecord.js";
 // import classSchema from "./Class.js"; 
 // import sectionSchema from "./Section.js";
 
+
+import schoolSettingsSchema from "./SchoolSettings.js";
+
 /**
  * Registers and returns models for a specific tenant connection.
  * This ensures that models are scoped to the correct database.
@@ -31,6 +34,20 @@ export const registerTenantModels = (connection) => {
     
     // Finance
     Fee: connection.models.Fee || connection.model("Fee", feeSchema),
+
+
+
+        /* =========================================
+       GEO FENCING SETTINGS
+    ========================================= */
+    SchoolSettings:
+      connection.models
+        .SchoolSettings ||
+      connection.model(
+        "SchoolSettings",
+        schoolSettingsSchema
+      ),
+
 
     /* Future proofing: Uncomment these as you create the schemas */
     // Class: connection.models.Class || connection.model("Class", classSchema),

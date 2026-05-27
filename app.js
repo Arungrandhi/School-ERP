@@ -8,6 +8,7 @@ import attendanceRoutes from "./routes/attendanceRoutes.js";
 import marksRoutes from "./routes/marksRoutes.js";
 
 import geocodeRoutes from "./routes/geocodeRoutes.js";
+import schoolSettingsRoutes from "./routes/schoolSettingsRoutes.js";
 
 
 const app = express();
@@ -15,13 +16,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/tenant", tenantRoutes);
 
 app.use("/api/geocode", geocodeRoutes);
-
+app.use("/api/school-settings",schoolSettingsRoutes);
 
 app.use("/api/academic", academicRoutes);
 app.use("/api/attendance", attendanceRoutes);

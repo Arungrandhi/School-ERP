@@ -6,64 +6,127 @@ const attendanceSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "AcademicRecord",
       required: true,
-      index: true
+      index: true,
     },
 
     date: {
       type: Date,
-      required: true
+      required: true,
     },
 
     session: {
       type: String,
       enum: ["MORNING", "AFTERNOON"],
-      required: true
+      required: true,
     },
 
     status: {
       type: String,
-      enum: ["PRESENT", "ABSENT", "LEAVE"],
-      required: true
+      enum: ["PRESENT", "ABSENT", "LEAVE", "LATE"],
+      required: true,
     },
 
-    // ✅ PUNCH-IN LOCATION (captured when staff marks attendance)
+    // =========================================
+    // PUNCH-IN LOCATION
+    // =========================================
     punchInLocation: {
       latitude: {
         type: Number,
-        default: null
+        default: null,
       },
+
       longitude: {
         type: Number,
-        default: null
+        default: null,
       },
+
       address: {
         type: String,
-        default: null
+        default: null,
       },
-      // Accuracy in meters from browser GPS
+
+      // GPS accuracy in meters
       accuracy: {
         type: Number,
-        default: null
+        default: null,
       },
-      // Timestamp of when punch-in occurred
+
+      // Punch-in timestamp
       punchedAt: {
         type: Date,
-        default: null
-      }
-    }
+        default: null,
+      },
+    },
+
+    // =========================================
+    // PUNCH-OUT
+    // =========================================
+    /* =========================================
+   PUNCH-OUT LOCATION
+========================================= */
+    punchOutLocation: {
+      latitude: {
+        type: Number,
+        default: null,
+      },
+
+      longitude: {
+        type: Number,
+        default: null,
+      },
+
+      accuracy: {
+        type: Number,
+        default: null,
+      },
+
+      punchedOutAt: {
+        type: Date,
+        default: null,
+      },
+    },
+
+    // =========================================
+    // WORKING HOURS
+    // =========================================
+    workingHours: {
+      type: Number,
+      default: 0,
+    },
+
+    // =========================================
+    // OPTIONAL SECURITY / AUDIT
+    // =========================================
+    deviceInfo: {
+      type: String,
+      default: null,
+    },
+
+    ipAddress: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
 /*
-  ✅ Prevent duplicate attendance
-  Same student / staff
+  =========================================
+  Prevent duplicate attendance
+  Same staff/student
   Same date
   Same session
+  =========================================
 */
 attendanceSchema.index(
-  { academicRecordId: 1, date: 1, session: 1 },
-  { unique: true }
+  {
+    academicRecordId: 1,
+    date: 1,
+    session: 1,
+  },
+  {
+    unique: true,
+  }
 );
 
 export default attendanceSchema;

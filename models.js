@@ -69,10 +69,10 @@ export const userSchema = new mongoose.Schema(
 // ---------- Student ----------
 export const studentSchema = new mongoose.Schema(
   {
-    name: String,
+    firstName: String, 
+    lastName: String,
     admissionNo: { type: String, unique: true },
-    className: String,
-    section: String,
+    passwordHash: String,
     status: { type: String, default: "ACTIVE" },
   },
   { timestamps: true }
@@ -100,6 +100,19 @@ export const feeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+
+export const academicRecordSchema = new mongoose.Schema(
+  {
+    studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+    className: String,
+    section: String,
+    academicYear: String,
+    status: { type: String, default: "ACTIVE" },
+  },
+  { timestamps: true }
+);
+
 /* =====================================================
    REGISTER TENANT MODELS PER SCHOOL CONNECTION
 ===================================================== */
@@ -110,5 +123,7 @@ export const registerTenantModels = (connection) => {
     Student: connection.models.Student || connection.model("Student", studentSchema),
     Staff: connection.models.Staff || connection.model("Staff", staffSchema),
     Fee: connection.models.Fee || connection.model("Fee", feeSchema),
+    // ADD THIS LINE:
+    AcademicRecord: connection.models.AcademicRecord || connection.model("AcademicRecord", academicRecordSchema),
   };
 };

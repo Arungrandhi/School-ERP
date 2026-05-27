@@ -1,55 +1,130 @@
 import express from "express";
+
 import { tenantResolver } from "../middleware/tenantResolver.js";
+
 import {
   markAttendance,
   getStudentAttendance,
   bulkMarkAttendance,
+  getAttendanceClasses,
   getClassAttendance,
   getMonthlyAttendanceSummary,
-  staffPunchIn                    // ✅ NEW
+  staffPunchIn,
+  punchOut,
+  monthlyReport,
+  attendanceHistory,
+  getAllStaffAttendanceHistory,
 } from "../controllers/attendanceController.js";
 
 const router = express.Router();
 
 /* =====================================================
-   ✅ NEW: STAFF PUNCH-IN WITH LOCATION
-   POST /api/attendance/punch-in
-   Body: { academicRecordId, session, punchInLocation: { latitude, longitude, address, accuracy } }
+   TEST ROUTE
 ===================================================== */
-router.post("/punch-in", tenantResolver, staffPunchIn);
+router.get("/test", (req, res) => {
+  res.json({
+    message: "Attendance route working",
+  });
+});
 
 /* =====================================================
-   BULK MARK ATTENDANCE (Whole Class - Session Wise)
-   POST /api/attendance/bulk
-   Body now accepts optional: punchInLocation
+   STAFF PUNCH-IN
 ===================================================== */
-router.post("/bulk", tenantResolver, bulkMarkAttendance);
+router.post(
+  "/punch-in",
+  tenantResolver,
+  staffPunchIn
+);
 
 /* =====================================================
-   GET STUDENT ATTENDANCE REPORT
-   GET /api/attendance/student-report
-   Query: academicRecordId, startDate, endDate
+   STAFF PUNCH-OUT
 ===================================================== */
-router.get("/student-report", tenantResolver, getStudentAttendance);
+router.post(
+  "/punch-out",
+  tenantResolver,
+  punchOut
+);
+
 
 /* =====================================================
-   GET CLASS ATTENDANCE
-   GET /api/attendance/class
-   Query: date, session
+   ALL STAFF ATTENDANCE HISTORY
 ===================================================== */
-router.get("/class", tenantResolver, getClassAttendance);
+router.get(
+  "/all-history",
+  tenantResolver,
+  getAllStaffAttendanceHistory
+);
 
 /* =====================================================
-   GET MONTHLY SUMMARY
-   GET /api/attendance/monthly-summary
+   MONTHLY REPORT
 ===================================================== */
-router.get("/monthly-summary", tenantResolver, getMonthlyAttendanceSummary);
+router.get(
+  "/monthly-report",
+  tenantResolver,
+  monthlyReport
+);
 
 /* =====================================================
-   MARK SINGLE STUDENT ATTENDANCE
-   POST /api/attendance
-   Body now accepts optional: punchInLocation
+   ATTENDANCE HISTORY
 ===================================================== */
-router.post("/", tenantResolver, markAttendance);
+router.get(
+  "/history/:academicRecordId",
+  tenantResolver,
+  attendanceHistory
+);
+
+/* =====================================================
+   BULK ATTENDANCE
+===================================================== */
+router.post(
+  "/bulk",
+  tenantResolver,
+  bulkMarkAttendance
+);
+
+
+
+
+router.get(
+  "/classes",
+  tenantResolver,
+  getAttendanceClasses
+);
+
+/* =====================================================
+   STUDENT ATTENDANCE REPORT
+===================================================== */
+router.get(
+  "/student-report",
+  tenantResolver,
+  getStudentAttendance
+);
+
+/* =====================================================
+   CLASS ATTENDANCE
+===================================================== */
+router.get(
+  "/class",
+  tenantResolver,
+  getClassAttendance
+);
+
+/* =====================================================
+   MONTHLY SUMMARY
+===================================================== */
+router.get(
+  "/monthly-summary",
+  tenantResolver,
+  getMonthlyAttendanceSummary
+);
+
+/* =====================================================
+   SINGLE ATTENDANCE
+===================================================== */
+router.post(
+  "/",
+  tenantResolver,
+  markAttendance
+);
 
 export default router;

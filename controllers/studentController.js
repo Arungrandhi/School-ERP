@@ -73,29 +73,36 @@ export const getStudents = async (req, res) => {
   try {
     const { Student, AcademicRecord } = req.tenantModels;
 
-    const students = await Student.find().sort({ createdAt: -1 }).lean();
+    // Check if models exist
+    if (!Student || !AcademicRecord) {
+        return res.status(500).json({ message: "Models not initialized correctly" });
+    }
 
+    const students = await Student.find().sort({ createdAt: -1 }).lean();
     const records = await AcademicRecord.find({ status: "ACTIVE" }).lean();
 
     const recordMap = {};
     records.forEach(r => {
-      recordMap[r.studentId.toString()] = r;
+      if (r.studentId) {
+        recordMap[r.studentId.toString()] = r;
+      }
     });
 
     const formatted = students.map(s => ({
       _id: s._id,
-      firstName: s.firstName,
-      lastName: s.lastName,
+      firstName: s.firstName || "N/A",
+      lastName: s.lastName || "",
       admissionNo: s.admissionNo,
       status: s.status,
-      currentClass: recordMap[s._id]?.className || null,
-      currentSection: recordMap[s._id]?.section || null,
-      currentYear: recordMap[s._id]?.academicYear || null
+      currentClass: recordMap[s._id.toString()]?.className || "N/A",
+      currentSection: recordMap[s._id.toString()]?.section || "N/A",
+      currentYear: recordMap[s._id.toString()]?.academicYear || "N/A"
     }));
 
     res.json(formatted);
 
   } catch (err) {
+    console.error("GET STUDENTS ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };

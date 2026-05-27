@@ -44,7 +44,13 @@ export const promoteStudent = async (req, res) => {
     // 4️⃣ Create new academic record
     const newRecord = await AcademicRecord.create({
       studentId,
-      className: newClass,
+      className:
+        String(newClass)
+          .replace("th", "")
+          .replace("st", "")
+          .replace("nd", "")
+          .replace("rd", "")
+          .trim(),
       section: newSection || previous.section,
       academicYear,
       status: "ACTIVE"
@@ -66,70 +72,122 @@ export const promoteStudent = async (req, res) => {
 
 
 /* ======================================================
-   GET STUDENTS BY CLASS + SECTION + ACADEMIC YEAR
+   GET STUDENTS BY CLASS
 ====================================================== */
-export const getStudentsByClass = async (req, res) => {
-  try {
-    const { Student, AcademicRecord } = req.tenantModels;
-    const { className, section, academicYear } = req.query;
+export const getStudentsByClass =
+  async (req, res) => {
 
-    // FIX: Only className and academicYear are strictly required now
-    if (!className || !academicYear) {
-      return res.status(400).json({
-        message: "className and academicYear are required"
-      });
-    }
+    try {
 
-    // Build the query object dynamically
-    const queryObj = {
-      className,
-      academicYear,
-      status: "ACTIVE"
-    };
+      const {
+        className,
+        section,
+      } = req.query;
 
-    // Only add section to the search if it's actually provided
-    if (section && section.trim() !== "") {
-      queryObj.section = section;
-    }
+      const {
+        AcademicRecord,
+        Student,
+      } = req.tenantModels;
 
-    // 1️⃣ Find ACTIVE academic records
-    const records = await AcademicRecord.find(queryObj).lean();
+      if (!className || !section) {
 
-    if (records.length === 0) {
-      return res.json([]);
-    }
+        return res.status(400).json({
+          message:
+            "className and section are required",
+        });
+      }
 
-    // 2️⃣ Get student IDs
-    const studentIds = records.map(r => r.studentId);
+      /* =========================================
+         FETCH STUDENTS
+      ========================================= */
+      const students =
+        await AcademicRecord.find({
+          className,
+          section,
+          status: "ACTIVE",
+        })
 
-    // 3️⃣ Fetch active students
-    const students = await Student.find({
-      _id: { $in: studentIds },
-      status: "ACTIVE"
-    }).lean();
+          .populate({
+            path: "studentId",
 
-    // 4️⃣ Merge student + academic record
-    const formatted = students.map(student => {
-      const record = records.find(
-        r => r.studentId.toString() === student._id.toString()
+            // IMPORTANT FOR MULTI TENANT
+            model: Student,
+
+            select:
+              "firstName lastName admissionNo",
+          })
+
+          .sort({
+            createdAt: 1,
+          })
+
+          .lean();
+
+      /* =========================================
+         REMOVE INVALID RECORDS
+      ========================================= */
+      const validStudents =
+        students.filter(
+          (s) => s.studentId
+        );
+
+      console.log(
+        "CLASS STUDENTS:",
+        validStudents
       );
 
-      return {
-        academicRecordId: record._id,
-        studentId: student._id,
-        firstName: student.firstName,
-        lastName: student.lastName,
-        admissionNo: student.admissionNo,
-        className: record.className,
-        section: record.section,
-        academicYear: record.academicYear
-      };
-    });
+      res.json(validStudents);
 
-    res.json(formatted);
+    } catch (error) {
 
-  } catch (error) {
-    console.error("Get Students By Class Error:", error);
-    res.status(500).json({ message: error.message });
-  }
-};
+      console.error(
+        "GET STUDENTS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        message: error.message,
+      });
+    }
+  };
+
+
+
+  /* ======================================================
+   GET ACTIVE ACADEMIC RECORD BY STUDENT
+====================================================== */
+export const getAcademicRecordByStudent =
+  async (req, res) => {
+
+    try {
+
+      const { AcademicRecord } =
+        req.tenantModels;
+
+      const record =
+        await AcademicRecord.findOne({
+          studentId:
+            req.params.studentId,
+
+          status: "ACTIVE",
+        });
+
+      if (!record) {
+
+        return res.status(404).json({
+          message:
+            "Academic record not found",
+        });
+      }
+
+      res.json(record);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message: error.message,
+      });
+    }
+  };
